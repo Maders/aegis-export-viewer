@@ -15,10 +15,9 @@ The Aegis Authenticator app allows users to export their OTP entries to a JSON f
 
 ## Usage
 
-1. Clone or download this repository to your local machine.
-2. Open the `index.html` file in a web browser.
-3. Click the "Choose File" button to select the Aegis Authenticator export file (in JSON format) you want to view.
-4. The viewer will display the OTP entries with their names and QR codes.
+1. Clone this repository to your local machine (then open the `index.html` file in a web browser) or use the [online version](http://maders.ir/aegis-export-viewer/) (Note: This app runs **entirely on the client-side and does not store any data**).
+2. Click the "Choose File" button to select the Aegis Authenticator export file (in JSON format) you want to view.
+3. The viewer will display the OTP entries with their names and QR codes.
 
 ## Dependencies
 
