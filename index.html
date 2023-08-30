@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Viewer for Aegis Authenticator OTP export files with QR code generation."
+    />
+    <meta
+      name="keywords"
+      content="Aegis Authenticator, OTP, QR code, export files, viewer"
+    />
+    <meta name="author" content="Ehsan Maders" />
+    <link href="icon.png" rel="shortcut icon" type="image/x-icon" />
+
+    <meta
+      property="og:title"
+      content="Aegis Authenticator Export File Viewer"
+    />
+    <meta
+      property="og:description"
+      content="Viewer for Aegis Authenticator OTP export files with QR code generation."
+    />
+    <meta property="og:type" content="website" />
+
+    <title>AEGIS OTP Export Viwer</title>
+    <script
+      src="https://cdn.jsdelivr.net/npm/qrcode_js@1.0.0/qrcode.min.js"
+      integrity="sha256-xUHvBjJ4hahBW8qN9gceFBibSFUzbe9PNttUvehITzY="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <a href="https://github.com/Maders/aegis-export-viewer">
+      <p>View on Github</p>
+    </a>
+
+    <label for="jsonFile">Select Aegis Authenticator Export File:</label>
+    <input type="file" id="jsonFile" accept="application/json" />
+    <div id="otpContainer"></div>
+
+    <script>
+      function generateOTP(entry) {
+        const { issuer, info } = entry;
+        const queryParams = new URLSearchParams({
+          issuer: issuer,
+          secret: info.secret,
+          algorithm: info.algo,
+          digits: info.digits,
+          period: info.period,
+        }).toString();
+
+        const type = entry.type.toLowerCase();
+        const name = entry.name || 'unnamed';
+        const label = entry.note ? `${name} :: ${entry.note}` : name;
+        return { url: `otpauth://${type}/${label}?${queryParams}`, label };
+      }
+
+      function renderEntry(entry) {
+        const { url: otpUrl, label } = generateOTP(entry);
+
+        const entryContainer = document.createElement('div');
+        entryContainer.innerHTML = `
+        <p>${label}</p>
+        <div></div>
+      `;
+
+        new QRCode(entryContainer.querySelector('div'), otpUrl);
+
+        return entryContainer;
+      }
+
+      document
+        .getElementById('jsonFile')
+        .addEventListener('change', async (event) => {
+          const file = event.target.files[0];
+          const jsonData = await readFileAsJson(file);
+
+          const otpContainer = document.getElementById('otpContainer');
+          otpContainer.innerHTML = '';
+
+          jsonData.db.entries.forEach((entry) => {
+            const entryElement = renderEntry(entry);
+            otpContainer.appendChild(entryElement);
+          });
+        });
+
+      async function readFileAsJson(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+
+          reader.onload = (event) => {
+            try {
+              const jsonData = JSON.parse(event.target.result);
+              resolve(jsonData);
+            } catch (error) {
+              reject(error);
+            }
+          };
+
+          reader.readAsText(file);
+        });
+      }
+    </script>
+  </body>
+</html>
